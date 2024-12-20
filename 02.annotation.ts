@@ -22,6 +22,25 @@ enum Discipline {
   Chemistry = "Chemistry",
 }
 
+type ContactInfo = {
+  email: string;
+  phone: string;
+};
+
+type AcademicPerformance = {
+  totalCredits: number;
+  gpa: number;
+};
+
+type PersonInfo = {
+  firstName: string;
+  lastName: string;
+  birthDay: Date;
+  gender: string;
+  email: string;
+  phone: string;
+};
+
 class UniversityError extends Error {
   constructor(message: string | undefined) {
     super(message);
@@ -64,6 +83,12 @@ class University {
       default:
         return this.assertNeverRole(role);
     }
+  }
+
+  getStudentById(id: number): Student | undefined {
+    return this.people.find(
+      (person): person is Student => person.role === Role.Student && person.id === id
+    );
   }
 
   assertNeverRole(role: never): never {
@@ -136,23 +161,13 @@ class Person {
 
   firstName: string;
   lastName: string;
-  birthDay: { getFullYear: () => number; getMonth: () => number; getDate: () => number; };
+  birthDay: Date;
   id: number;
   gender: string;
-  contactInfo: { email: string; phone: string; };
+  contactInfo: ContactInfo;
   role: Role;
 
-  constructor(
-    info: {
-      firstName: string;
-      lastName: string;
-      birthDay: Date;
-      gender: string;
-      email: string;
-      phone: string;
-    },
-    role: Role
-  ) {
+  constructor(info: PersonInfo, role: Role) {
     const { firstName, lastName, birthDay, gender, email, phone } = info;
 
     this.firstName = firstName;
@@ -188,7 +203,7 @@ class Teacher extends Person {
   specializations: string[] = [];
   courses: Course[] = [];
 
-  constructor(info: ConstructorParameters<typeof Person>[0], specializations: string[] = []) {
+  constructor(info: PersonInfo, specializations: string[] = []) {
     super(info, Role.Teacher);
     this.specializations = specializations;
   }
@@ -207,14 +222,11 @@ class Teacher extends Person {
 }
 
 class Student extends Person {
-  academicPerformance: {
-    totalCredits: number,
-    gpa: number,
-  } = {totalCredits: 0, gpa: 0}
+  academicPerformance: AcademicPerformance = { totalCredits: 0, gpa: 0 };
   enrolledCourses: Course[] = [];
   status: AcademicStatus;
 
-  constructor(info: ConstructorParameters<typeof Person>[0]) {
+  constructor(info: PersonInfo) {
     super(info, Role.Student);
     this.status = AcademicStatus.Active;
   }
